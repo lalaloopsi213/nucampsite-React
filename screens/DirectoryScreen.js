@@ -1,78 +1,46 @@
-import { ScrollView, Text } from 'react-native';
-import { Avatar, Card, ListItem } from 'react-native-elements';
+import { FlatList, Text, View } from 'react-native';
+import { Tile } from 'react-native-elements';
 import { useSelector } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
 import Loading from '../components/LoadingComponent';
+import * as Animatable from 'react-native-animatable';
 
-function Mission() {
-    return (
-        <Card>
-            <Card.Title>Our Mission</Card.Title>
-            <Card.Divider />
-            <Text style={{ margin: 10 }}>
-                We present a curated database of the best campsites in the vast
-                woods and backcountry of the World Wide Web Wilderness. We
-                increase access to adventure for the public while promoting safe
-                and respectful use of resources. The expert wilderness trekkers
-                on our staff personally verify each campsite to make sure that
-                they are up to our standards. We also present a platform for
-                campers to share reviews on campsites they have visited with
-                each other.
-            </Text>
-        </Card>
-    );
-}
+const DirectoryScreen = ({ navigation }) => {
+    const campsites = useSelector((state) => state.campsites);
 
-const AboutScreen = () => {
-    const partners = useSelector((state) => state.partners);
-
-    if (partners.isLoading) {
+    if (campsites.isLoading) {
+        return <Loading />;
+    }
+    if (campsites.errMess) {
         return (
-            <ScrollView>
-                <Mission />
-                <Card>
-                    <Card.Title>Community Partners</Card.Title>
-                    <Card.Divider />
-                    <Loading />
-                </Card>
-            </ScrollView>
+            <View>
+                <Text>{campsites.errMess}</Text>
+            </View>
         );
     }
-    if (partners.errMess) {
+
+    const renderDirectoryItem = ({ item: campsite }) => {
         return (
-            <ScrollView>
-                <Mission />
-                <Card>
-                    <Card.Title>Community Partners</Card.Title>
-                    <Card.Divider />
-                    <Text>{partners.errMess}</Text>
-                </Card>
-            </ScrollView>
+            <Animatable.View animation='fadeInRightBig' duration={2000}>
+                <Tile
+                    title={campsite.name}
+                    caption={campsite.description}
+                    featured
+                    onPress={() =>
+                        navigation.navigate('CampsiteInfo', { campsite })
+                    }
+                    imageSrc={{ uri: baseUrl + campsite.image }}
+                />
+            </Animatable.View>
         );
-    }
+    };
     return (
-        <ScrollView>
-            <Mission />
-            <Card>
-                <Card.Title>Community Partners</Card.Title>
-                <Card.Divider />
-                {partners.partnersArray.map((partner) => (
-                    <ListItem key={partner.id}>
-                        <Avatar
-                            rounded
-                            source={{ uri: baseUrl + partner.image }}
-                        />
-                        <ListItem.Content>
-                            <ListItem.Title>{partner.name}</ListItem.Title>
-                            <ListItem.Subtitle>
-                                {partner.description}
-                            </ListItem.Subtitle>
-                        </ListItem.Content>
-                    </ListItem>
-                ))}
-            </Card>
-        </ScrollView>
+        <FlatList
+            data={campsites.campsitesArray}
+            renderItem={renderDirectoryItem}
+            keyExtractor={(item) => item.id.toString()}
+        />
     );
 };
 
-export default AboutScreen;
+export default DirectoryScreen;
