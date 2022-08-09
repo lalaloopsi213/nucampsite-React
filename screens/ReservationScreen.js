@@ -8,8 +8,8 @@ import {
     Button,
     Alert
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from 'react-native-web';
+import DateTimePicker from 'react-datetime-picker';
 import * as Animatable from 'react-native-animatable';
 import * as Notifications from 'expo-notifications';
 
